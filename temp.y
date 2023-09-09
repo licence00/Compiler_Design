@@ -126,6 +126,20 @@
         printf("\"%s\" macro is not defined\n"); //improve
         return NULL;
     }
+
+    void debug()
+    {
+        for (int i = 0; i < number_of_macros; i++)
+        {
+            printf("the macro name is %s\n", macro_list[i].macro_name);
+            printf("the arguments are :\n");
+            for (int j = 0; j < macro_list[i].number_of_args; j++)
+            {
+                printf("%d --> %s\n", j, macro_list[i].macro_args[j].arg_name);
+            }
+            printf("the function is %s\n",macro_list[i].macro_func);
+        }
+    }
 %}
 
 %union
@@ -152,7 +166,7 @@
         strcat($$,$2);
         strcat($$,$3);
         printf("%s\n",$$);
-        //debug();
+        debug();
     }
     ;
 
