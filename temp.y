@@ -178,7 +178,7 @@
 
     MainClass : CLASS Identifier LFBRACKET PUBLIC STATIC VOID MAIN LCBRACKET STRING LSBRACKET RSBRACKET Identifier RCBRACKET LFBRACKET PRINTLINE LCBRACKET Expression RCBRACKET SEMICOLON RFBRACKET RFBRACKET
     {
-        sprintf($$,"%s %s %s\n%s %s %s %s %s %s %s %s %s %s %s\n%s %s %s %s\n%s\n%s\n%s\n", $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21);
+        sprintf($$,"%s %s %s\n%s %s %s %s %s %s %s%s %s %s %s\n%s %s %s %s\n%s\n%s\n%s\n", $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21);
     }
     ;
 
@@ -228,7 +228,7 @@
     }| { $$ = "";}
     ;
 
-    Type : INT LSBRACKET RSBRACKET {sprintf($$,"%s %s %s", $1,$2,$3);}
+    Type : INT LSBRACKET RSBRACKET {sprintf($$,"%s %s%s", $1,$2,$3);}
          | BOOLEAN {sprintf($$,"%s", $1);}
          | INT {sprintf($$,"%s", $1);}
          | Identifier {sprintf($$,"%s", $1);}
@@ -308,7 +308,7 @@
                       | NEW INT LSBRACKET Expression RSBRACKET {sprintf($$,"%s %s %s %s %s", $1,$2,$3,$4,$5);} 
                       | NEW Identifier LCBRACKET RCBRACKET 
                       {
-                            sprintf($$,"%s %s %s %s", $1,$2,$3,$4);
+                            sprintf($$,"%s %s %s%s", $1,$2,$3,$4);
                       }
                       | EXCLAMATION Expression {sprintf($$,"%s %s", $1,$2);}
                       | LCBRACKET Expression RCBRACKET {sprintf($$,"%s %s %s", $1,$2,$3);}
