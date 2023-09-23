@@ -15,10 +15,12 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
    // Auto class visitors--probably don't need to be overridden.
    //
 
+   boolean debug = true;
    boolean Storage=true;
    HashMap<String,HashMap<String,String>> class_var = new HashMap<String,HashMap<String,String>>();
    HashMap<String,HashMap<String,HashMap<String,String>>> method_var = new HashMap<String,HashMap<String,HashMap<String,String>>>();
    HashMap<String,HashMap<String,LinkedHashMap<String,String>>> method_arg = new HashMap<String,HashMap<String,LinkedHashMap<String,String>>>();
+   Vector<String> messagesend_arguments = new Vector<String>();
 
    public R visit(NodeList n, A argu) {
       R _ret=null;
@@ -76,47 +78,57 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       R _ret=null;
 
       n.f0.accept(this, argu);
+      if(debug)
+      {
+         System.out.println("main calss done");
+      }
       n.f1.accept(this, argu);
+      if(debug)
+      {
+         System.out.println("type declaration done");
+      }
       n.f2.accept(this, argu);
 
       System.out.println("\n\nMETHOD_VAR");
-      for(Map.Entry<String,HashMap<String,HashMap<String,String>>> first : method_var.entrySet())
-      {
-         String outerkey = first.getKey();
-         System.out.println("class name is : "+outerkey);
-         HashMap<String,HashMap<String,String>> inner = first.getValue();
-         for(Map.Entry<String,HashMap<String,String>> second : inner.entrySet())
-         {
-            String innerkey = second.getKey();
-            System.out.println("method name is : "+innerkey);
-            HashMap<String,String> innermost = second.getValue();
-            for(Map.Entry<String,String> third : innermost.entrySet())
-            {
-               String innermostkey = third.getKey();
-               String innermostvalue = third.getValue();
-               System.out.println("var name is : "+innermostkey+ " type is : "+ innermostvalue);
-            }
-         }
-      }
+      // for(Map.Entry<String,HashMap<String,HashMap<String,String>>> first : method_var.entrySet())
+      // {
+      //    String outerkey = first.getKey();
+      //    System.out.println("class name is : "+outerkey);
+      //    HashMap<String,HashMap<String,String>> inner = first.getValue();
+      //    for(Map.Entry<String,HashMap<String,String>> second : inner.entrySet())
+      //    {
+      //       String innerkey = second.getKey();
+      //       System.out.println("method name is : "+innerkey);
+      //       HashMap<String,String> innermost = second.getValue();
+      //       for(Map.Entry<String,String> third : innermost.entrySet())
+      //       {
+      //          String innermostkey = third.getKey();
+      //          String innermostvalue = third.getValue();
+      //          System.out.println("var name is : "+innermostkey+ " type is : "+ innermostvalue);
+      //       }
+      //    }
+      // }
+      System.out.println(method_var);
       System.out.println("\n\nMETHOD_ARG");
-      for(Map.Entry<String,HashMap<String,LinkedHashMap<String,String>>> first : method_arg.entrySet())
-      {
-         String outerkey = first.getKey();
-         System.out.println("class name is : "+outerkey);
-         HashMap<String,LinkedHashMap<String,String>> inner = first.getValue();
-         for(Map.Entry<String,LinkedHashMap<String,String>> second : inner.entrySet())
-         {
-            String innerkey = second.getKey();
-            System.out.println("method name is : "+innerkey);
-            LinkedHashMap<String,String> innermost = second.getValue();
-            for(Map.Entry<String,String> third : innermost.entrySet())
-            {
-               String innermostkey = third.getKey();
-               String innermostvalue = third.getValue();
-               System.out.println("var name is : "+innermostkey+ " type is : "+ innermostvalue);
-            }
-         }
-      }
+      // for(Map.Entry<String,HashMap<String,LinkedHashMap<String,String>>> first : method_arg.entrySet())
+      // {
+      //    String outerkey = first.getKey();
+      //    System.out.println("class name is : "+outerkey);
+      //    HashMap<String,LinkedHashMap<String,String>> inner = first.getValue();
+      //    for(Map.Entry<String,LinkedHashMap<String,String>> second : inner.entrySet())
+      //    {
+      //       String innerkey = second.getKey();
+      //       System.out.println("method name is : "+innerkey);
+      //       LinkedHashMap<String,String> innermost = second.getValue();
+      //       for(Map.Entry<String,String> third : innermost.entrySet())
+      //       {
+      //          String innermostkey = third.getKey();
+      //          String innermostvalue = third.getValue();
+      //          System.out.println("var name is : "+innermostkey+ " type is : "+ innermostvalue);
+      //       }
+      //    }
+      // }
+      System.out.println(method_arg);
 
       Storage = false;
       n.f0.accept(this, argu);
@@ -192,7 +204,10 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       {
          n.f0.accept(this, argu);
          String class_name = (String)n.f1.accept(this, argu);
-
+         if(debug)
+         {
+            System.out.println("class name is : "+class_name + " in class declaration");
+         }
          Vector<String> class_arg = new Vector<String>();
          class_arg.add("class");
          class_arg.add(class_name);
@@ -207,7 +222,15 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          method_arg.put(class_name,method_arg_declaration);
          n.f2.accept(this, argu);
          n.f3.accept(this, (A)class_arg);
+         if(debug)
+         {
+            System.out.println("var declaration done in class declaration");
+         }
          n.f4.accept(this, (A)class_arg);
+         if(debug)
+         {
+            System.out.println("method declaration done in class declaration");
+         }
          n.f5.accept(this, argu);
       }
       else
@@ -354,8 +377,12 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       if(Storage)
       {
          n.f0.accept(this, argu);
-         Vector<String> class_method = (Vector<String>)argu;
-         String class_name = (String)class_method.get(1);
+         Vector<String> arguments = (Vector<String>)argu;
+         String class_name = (String)arguments.get(1);
+         if(debug)
+         {
+            System.out.println("class name is : "+class_name + " in method declar arguments");
+         }
 
          String method_name = (String)n.f2.accept(this, argu);
 
@@ -377,6 +404,16 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          //for storing arguments in method declaration
          LinkedHashMap<String,String> method_arguments = new LinkedHashMap<String,String>();
          method_arg.get(class_name).put(method_name,method_arguments);
+
+         Vector<String> class_method = new Vector<String>();
+         class_method.add(class_name);
+         class_method.add(method_name);
+
+         if(debug)
+         {
+            System.out.println("updated class method is :");
+            System.out.println(class_method);
+         }
 
          n.f1.accept(this, argu);
          n.f2.accept(this, argu);
@@ -484,11 +521,13 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          
          if(type == "int" || type == "boolean" || type == "int[]")
          {
+            _ret = (R)type;
             return _ret;
          }
 
          if(class_var.containsKey(type))
          {
+            _ret = (R)type;
             return _ret;
          }
 
@@ -529,13 +568,16 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       else
       {
          String type = (String)n.f0.accept(this, argu);
+
          if(type == "int" || type == "int[]" || type == "boolean")
          {
+            _ret = (R)type;
             return _ret;
          }
 
          if(class_var.containsKey(type))
          {
+            _ret = (R)type;
             return _ret;
          }
          
@@ -1338,7 +1380,10 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       else
       {
          String class_name = (String)n.f0.accept(this, argu);
-
+         if(debug)
+         {
+            System.out.println("class name is " + class_name + " in messagesend");
+         }
          if(class_var.get(class_name) == null)
          {
             System.out.println("class not found in messagesend");
@@ -1347,7 +1392,10 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          }
          n.f1.accept(this, argu);
          String method_name = (String)n.f2.accept(this, argu);
-
+         if(debug)
+         {
+            System.out.println("method name is " + method_name + " in messagesend");
+         }
          if(method_var.get(class_name).get(method_name) == null)
          {
             System.out.println("method not found in that class in messagesend");
@@ -1356,7 +1404,10 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          }
 
          String return_type = method_var.get(class_name).get(method_name).get("return");
-
+         if(debug)
+         {
+            System.out.println("return type is " + return_type + " in messagesend");
+         }
          if(return_type == null)
          {
             System.out.println("return type is not declared for method declaraion in messagesend");
@@ -1365,27 +1416,44 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          }
       
          n.f3.accept(this, argu);
-         n.f4.accept(this, argu);
 
          Vector<String>type_expr = (Vector<String>)n.f4.accept(this, argu);
-
-         if(type_expr.size() != method_arg.get(class_name).get(method_name).size())
+         
+         if(debug)
          {
-            System.out.println("Arguments and Sending lengths doesn't match");
-            System.out.println("Type Check Error");
-            System.exit(0);
+            System.out.println("argumetns types in messagesend");
+            System.out.println(type_expr);
          }
 
-         int index = 0;
-         for(Map.Entry<String,String> method_arguments : method_arg.get(class_name).get(method_name).entrySet())
+         if(type_expr != null)
          {
-            String arg_type = method_arguments.getValue();
-            if(type_expr.get(index) != arg_type)
+            if(type_expr.size() != method_arg.get(class_name).get(method_name).size())
             {
+               System.out.println("Arguments and Sending lengths doesn't match");
                System.out.println("Type Check Error");
                System.exit(0);
             }
-            index++;
+
+            int index = 0;
+            for(Map.Entry<String,String> method_arguments : method_arg.get(class_name).get(method_name).entrySet())
+            {
+               String arg_type = method_arguments.getValue();
+               if(type_expr.get(index) != arg_type)
+               {
+                  System.out.println("Type Check Error");
+                  System.exit(0);
+               }
+               index++;
+            }
+         }
+         else
+         {
+            if(method_arg.get(class_name).get(method_name).size() != 0)
+            {
+               System.out.println("Arguments and Sending lengths doesn't match");
+               System.out.println("Type Check Error");
+               System.exit(0);
+            }
          }
 
          n.f5.accept(this, argu);
@@ -1408,14 +1476,32 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       }
       else
       {
-         n.f0.accept(this, argu);
-         n.f1.accept(this, argu);
-
          Vector<String>expr1 = new Vector<String>();
          expr1.add((String)n.f0.accept(this, argu));
 
+         if(debug)
+         {
+            System.out.println("expr1 is " + expr1);
+         }
+
          Vector<String>expr2 = (Vector<String>)n.f1.accept(this, argu);
-         expr1.addAll(expr2);
+         if(debug)
+         {
+            System.out.println("expr2 is " + expr2);
+         }
+         if(expr2 != null)
+         {
+            for(int i = 0; i < expr2.size(); i++)
+            {
+               expr1.add(expr2.get(i));
+            }
+         }
+
+         if(debug)
+         {
+            System.out.println("after summation in vectors");
+            System.out.println("expr1 is " + expr1);
+         }
 
          _ret = (R)expr1;
       }
@@ -1437,11 +1523,17 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       else
       {
          n.f0.accept(this, argu);
-         n.f1.accept(this, argu);
-
+         String expr_type = (String)n.f1.accept(this, argu);
+         if(debug)
+         {
+            System.out.println("expr_type is " + expr_type + " in expressionrest");
+         }
          Vector<String> type_expr = new Vector<String>();
-         type_expr.add((String)n.f1.accept(this, argu));  
-
+         type_expr.add(expr_type); 
+         if(debug)
+         {
+            System.out.println("type_expr is " + type_expr + " in expressionrest");
+         }
          _ret = (R)type_expr;
       }
       return _ret;
@@ -1468,7 +1560,7 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       else
       {
          String id_name = (String)n.f0.accept(this, argu);
-         String type = "";
+         String type = id_name; //check this statemetnt again
 
          Vector<String>class_method = (Vector<String>)argu;
 
@@ -1563,13 +1655,14 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       
       if(Storage)
       {
-         String type = (String)n.f0.accept(this, argu);
-         _ret = (R)type;
+        // String type = (String)n.f0.accept(this, argu);
+         _ret = (R)n.f0.toString();
       }
       else
       {
-         String type = (String)n.f0.toString();
-         _ret = (R)type;
+         //String type = (String)n.f0.accept(this,argu);
+         //_ret = (R)type;
+         _ret = (R)n.f0.toString();
       }
       return _ret;
    }
