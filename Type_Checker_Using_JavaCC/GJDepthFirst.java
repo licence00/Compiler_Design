@@ -20,6 +20,7 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
    HashMap<String,HashMap<String,String>> class_var = new HashMap<String,HashMap<String,String>>();
    HashMap<String,HashMap<String,HashMap<String,String>>> method_var = new HashMap<String,HashMap<String,HashMap<String,String>>>();
    HashMap<String,HashMap<String,LinkedHashMap<String,String>>> method_arg = new HashMap<String,HashMap<String,LinkedHashMap<String,String>>>();
+   HashMap<String,String> extend_mapping = new HashMap<String,Vector<String>>();
    Vector<String> messagesend_arguments = new Vector<String>();
 
    public R visit(NodeList n, A argu) {
@@ -89,46 +90,14 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       }
       n.f2.accept(this, argu);
 
-      System.out.println("\n\nMETHOD_VAR");
-      // for(Map.Entry<String,HashMap<String,HashMap<String,String>>> first : method_var.entrySet())
-      // {
-      //    String outerkey = first.getKey();
-      //    System.out.println("class name is : "+outerkey);
-      //    HashMap<String,HashMap<String,String>> inner = first.getValue();
-      //    for(Map.Entry<String,HashMap<String,String>> second : inner.entrySet())
-      //    {
-      //       String innerkey = second.getKey();
-      //       System.out.println("method name is : "+innerkey);
-      //       HashMap<String,String> innermost = second.getValue();
-      //       for(Map.Entry<String,String> third : innermost.entrySet())
-      //       {
-      //          String innermostkey = third.getKey();
-      //          String innermostvalue = third.getValue();
-      //          System.out.println("var name is : "+innermostkey+ " type is : "+ innermostvalue);
-      //       }
-      //    }
-      // }
+      System.out.println("\nCLASS_VAR\n");
+      System.out.println(class_var);
+      System.out.println("\nMETHOD_VAR\n");
       System.out.println(method_var);
-      System.out.println("\n\nMETHOD_ARG");
-      // for(Map.Entry<String,HashMap<String,LinkedHashMap<String,String>>> first : method_arg.entrySet())
-      // {
-      //    String outerkey = first.getKey();
-      //    System.out.println("class name is : "+outerkey);
-      //    HashMap<String,LinkedHashMap<String,String>> inner = first.getValue();
-      //    for(Map.Entry<String,LinkedHashMap<String,String>> second : inner.entrySet())
-      //    {
-      //       String innerkey = second.getKey();
-      //       System.out.println("method name is : "+innerkey);
-      //       LinkedHashMap<String,String> innermost = second.getValue();
-      //       for(Map.Entry<String,String> third : innermost.entrySet())
-      //       {
-      //          String innermostkey = third.getKey();
-      //          String innermostvalue = third.getValue();
-      //          System.out.println("var name is : "+innermostkey+ " type is : "+ innermostvalue);
-      //       }
-      //    }
-      // }
+      System.out.println("\nMETHOD_ARG\n");
       System.out.println(method_arg);
+      System.out.println("\nEXTENdS\n")
+      System.out.println(extend_mapping);
 
       Storage = false;
       n.f0.accept(this, argu);
@@ -204,10 +173,14 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       {
          n.f0.accept(this, argu);
          String class_name = (String)n.f1.accept(this, argu);
-         if(debug)
+         
+         if(class_var.containsKey(class_name))
          {
-            System.out.println("class name is : "+class_name + " in class declaration");
+            System.out.println("Class already exists");
+            System.out.println("Type Check Error");
+            System.exit(0);
          }
+
          Vector<String> class_arg = new Vector<String>();
          class_arg.add("class");
          class_arg.add(class_name);
@@ -222,15 +195,7 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          method_arg.put(class_name,method_arg_declaration);
          n.f2.accept(this, argu);
          n.f3.accept(this, (A)class_arg);
-         if(debug)
-         {
-            System.out.println("var declaration done in class declaration");
-         }
          n.f4.accept(this, (A)class_arg);
-         if(debug)
-         {
-            System.out.println("method declaration done in class declaration");
-         }
          n.f5.accept(this, argu);
       }
       else
@@ -260,6 +225,43 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
     */
    public R visit(ClassExtendsDeclaration n, A argu) {
       R _ret=null;
+      if(Storage)
+      {
+         n.f0.accept(this, argu);
+         String class_name = (String)n.f1.accept(this, argu);
+         
+         if(class_var.containsKey(class_name))
+         {
+            System.out.println("Class already exists");
+            System.out.println("Type Check Error");
+            System.exit(0);
+         }
+
+         n.f2.accept(this, argu);
+         String parent_name = (String)n.f3.accept(this, argu);
+         extend_mapping.put(class_name,parent_name);
+
+         vector<String>class_method = new Vector<String>();
+         class_method.add("class");
+         class_method.add(class_name);
+         
+         n.f4.accept(this, argu);
+         n.f5.accept(this, (A)class_method);
+         n.f6.accept(this, (A)class_method);
+         n.f7.accept(this, argu);
+      }
+      else
+      {
+         n.f0.accept(this, argu);
+         String class_name = (String)n.f1.accept(this, argu);
+         Vector<String>class_arg = new Vector<String>();
+         class_arg.add("class");
+         class_arg.add(class_name);
+         n.f2.accept(this, argu);
+         n.f3.accept(this, (A)class_arg);
+         n.f4.accept(this, (A)class_arg);
+         n.f5.accept(this, argu);
+      }
       n.f0.accept(this, argu);
       n.f1.accept(this, argu);
       n.f2.accept(this, argu);
@@ -435,6 +437,36 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          Vector<String> arguments = (Vector<String>)argu;
          String class_name = (String)arguments.get(1);
          String method_name = (String)n.f2.accept(this, argu);
+
+         String parent_class = extend_mapping.get(class_name);
+         if(parent_class == null)
+         {
+            System.out.println("Symbol Not Found");
+            System.exit(0);
+         }
+         while(parent_class != null)
+         {
+            if(method_var.containsKey(parent_class))
+            {
+               if(method_var.get(parent_class).containsKey(method_name))
+               {
+                  Vector<String> child_arg = new Vector<>(method_arg.get(class_name).get(method_name).values());
+                  Vector<String> parent_arg = new Vector<>(method_arg.get(parent_class).get(method_name).values());
+                  if(!child_arg.equals(parent_arg))
+                  {
+                     System.out.println("Type Check Error");
+                     System.exit(0);
+                  }
+               }
+            }
+            else
+            {
+               System.out.println("Symbol Not Found");
+               System.exit(0);
+            }
+            parent_class = extend_mapping.get(parent_class);
+         }
+
          String return_type = method_var.get(class_name).get(method_name).get("return");
          n.f3.accept(this, argu);
 
@@ -718,11 +750,36 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          {
             type = method_arg.get(class_method.get(0)).get(class_method.get(1)).get(id_name);
          }
-         if(type == null)
+         if(type == null) //variable not declared in its class checking in parent classes
          {
-            System.out.println("Variable not declared");
-            System.out.println("Type Check Error");
-            System.exit(0);
+            String parent_class = extend_mapping.get(class_method.get(0));
+            if(parent_class == null)
+            {
+               System.out.println("Symbol Not Found");
+               System.exit(0);
+            }
+            while(parent_class != null)
+            {
+               if(class_var.containsKey(parent_class))
+               {
+                  if(class_var.get(parent_class).containsKey(id_name))
+                  {
+                     type = class_var.get(parent_class).get(id_name);
+                     break;
+                  }
+               }
+               else
+               {
+                  System.out.println("Symbol Not Found");
+                  System.exit(0);
+               }
+               parent_class = extend_mapping.get(parent_class);
+            }
+            if(type == null)
+            {
+               System.out.println("Symbol Not Found");
+               System.exit(0);
+            }
          }      
 
          n.f1.accept(this, argu);
@@ -1416,9 +1473,10 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          }
       
          n.f3.accept(this, argu);
+         n.f4.accept(this, argu);
 
-         Vector<String>type_expr = (Vector<String>)n.f4.accept(this, argu);
-         
+         Vector<String>type_expr = (Vector<String>)messagesend_arguments.clone();
+         messagesend_arguments.clear();
          if(debug)
          {
             System.out.println("argumetns types in messagesend");
@@ -1476,34 +1534,10 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       }
       else
       {
-         Vector<String>expr1 = new Vector<String>();
-         expr1.add((String)n.f0.accept(this, argu));
-
-         if(debug)
-         {
-            System.out.println("expr1 is " + expr1);
-         }
-
-         Vector<String>expr2 = (Vector<String>)n.f1.accept(this, argu);
-         if(debug)
-         {
-            System.out.println("expr2 is " + expr2);
-         }
-         if(expr2 != null)
-         {
-            for(int i = 0; i < expr2.size(); i++)
-            {
-               expr1.add(expr2.get(i));
-            }
-         }
-
-         if(debug)
-         {
-            System.out.println("after summation in vectors");
-            System.out.println("expr1 is " + expr1);
-         }
-
-         _ret = (R)expr1;
+         String expr1 = (String)n.f0.accept(this, argu);
+         messagesend_arguments.add(expr1);
+         n.f1.accept(this, argu);
+         //_ret = (R)expr1;
       }
       return _ret;
    }
@@ -1524,17 +1558,7 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       {
          n.f0.accept(this, argu);
          String expr_type = (String)n.f1.accept(this, argu);
-         if(debug)
-         {
-            System.out.println("expr_type is " + expr_type + " in expressionrest");
-         }
-         Vector<String> type_expr = new Vector<String>();
-         type_expr.add(expr_type); 
-         if(debug)
-         {
-            System.out.println("type_expr is " + type_expr + " in expressionrest");
-         }
-         _ret = (R)type_expr;
+         messagesend_arguments.add(expr_type);
       }
       return _ret;
    }
