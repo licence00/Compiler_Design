@@ -29,7 +29,7 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
    int labels = 0;
 
    boolean Storage = true;
-   boolean debug = true;
+   boolean debug = false;
 
    public R visit(NodeList n, A argu) {
       R _ret=null;
@@ -96,19 +96,19 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       if(debug)
       {
          System.out.println(class_var);
-
+         System.out.println("\n\n");
          System.out.println(method_names);
-
+         System.out.println("\n\n");
          System.out.println(method_args);
-
+         System.out.println("\n\n");
          System.out.println(temp_method_var);
-
+         System.out.println("\n\n");
          System.out.println(temp_start_value);
       }
 
       Storage = false;
 
-      n.f0.accept(this, argu);
+      //n.f0.accept(this, argu);
       n.f1.accept(this, argu);
       n.f2.accept(this, argu);
 
@@ -389,17 +389,17 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          Vector<String>loc = new Vector<String>();
          loc.add(class_name);
          loc.add(method_name);
-         if(debug)
-         {
-            System.out.println(loc + "in method declaraiton");
-         }
+         // if(debug)
+         // {
+         //    System.out.println(loc + "in method declaraiton");
+         // }
          n.f3.accept(this, argu);
 
          n.f4.accept(this, (A)loc);
-         if(debug)
-         {
-            System.out.println("formal param done in method decalration");
-         }
+         // if(debug)
+         // {
+         //    System.out.println("formal param done in method decalration");
+         // }
          n.f5.accept(this, argu);
          n.f6.accept(this, argu);
          n.f7.accept(this, (A)loc);
@@ -449,14 +449,18 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          n.f6.accept(this, argu);
          System.out.println("BEGIN");
 
-         // if(debug)
-         // {
-         //    System.out.println(class_var.get(class_name));
-         //    System.out.println(method_names.get(class_name));
-         //    System.out.println(method_args.get(class_name).get(method_name));
-         //    System.out.println(temp_method_var.get(class_name).get(method_name));
-         //    System.out.println(temp_start_value.get(class_name).get(method_name));
-         // }
+         if(debug)
+         {
+            System.out.println(class_var.get(class_name));
+            System.out.println("\n\n");
+            System.out.println(method_names.get(class_name));
+            System.out.println("\n\n");
+            System.out.println(method_args.get(class_name).get(method_name));
+            System.out.println("\n\n");
+            System.out.println(temp_method_var.get(class_name).get(method_name));
+            System.out.println("\n\n");
+            System.out.println(temp_start_value.get(class_name).get(method_name));
+         }
 
          n.f7.accept(this, (A)loc);
          n.f8.accept(this, (A)loc);
@@ -1301,13 +1305,18 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       else
       {
          Vector<String>loc = (Vector<String>)argu;
-         String class_name = (String)n.f0.accept(this, argu);
+         n.f0.accept(this, argu);
          n.f1.accept(this, argu);
+         String class_name = loc.get(0);
          String method_name = (String)n.f2.accept(this, argu);
+         //if(debug)
+         {
+            System.out.println("calss name is "+class_name+" method naem is "+method_name+" in message send");
+         }
          Integer offset = method_names.get(class_name).get(method_name);
          Integer env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
 
-         System.out.println("MOVE TEMP "+env_index+" TEMP 0");
+         System.out.println("MOVE TEMP "+env_index+" TEMP "+ (env_index-1));
          env_index++;
 
          System.out.println("HLOAD TEMP "+env_index+" TEMP "+(env_index-1)+" 0");
@@ -1614,8 +1623,8 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          }
 
          System.out.println("HSTORE TEMP "+struct_address+" 0 TEMP "+method_table_address);
-         System.out.println("MOVE TEMP 0 TEMP "+struct_address);
-
+         System.out.println("MOVE TEMP "+env_index+" TEMP "+struct_address);
+         env_index++;
          temp_start_value.get(loc.get(0)).put(loc.get(1),env_index);
          if(debug)
          {
