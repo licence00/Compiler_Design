@@ -111,7 +111,7 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
 
       Storage = false;
 
-      //n.f0.accept(this, argu);
+      n.f0.accept(this, argu);
       n.f1.accept(this, argu);
       n.f2.accept(this, argu);
 
@@ -180,8 +180,14 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          String class_name = (String) n.f1.accept(this, argu);
          String method_name = "main";
 
-         HashMap<String,Integer> temp1 = new HashMap<String,Integer>();
-         temp_start_value.put(class_name,temp1);
+         HashMap<String,HashMap<Integer,String>> temp = new HashMap<String,HashMap<Integer,String>>();
+         temp_type.put(class_name,temp);
+
+         HashMap<Integer,String> temp1 = new HashMap<Integer,String>();
+         temp_type.get(class_name).put(method_name,temp1);
+
+         HashMap<String,Integer> temp2 = new HashMap<String,Integer>();
+         temp_start_value.put(class_name,temp2);
 
          temp_start_value.get(class_name).put(method_name,1);
 
@@ -501,7 +507,6 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          {
             System.out.println("RETURN TEMP " + (env_index-1));
          }
-         System.out.println("RETURN TEMP " + (env_index-1));
          System.out.println("END");
          n.f11.accept(this, argu);
          n.f12.accept(this, argu);
@@ -798,7 +803,7 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          int array_index = env_index-1;
          System.out.println("MOVE TEMP " + (env_index) + " PLUS TEMP " + (array_index) + " 1");
          env_index++;
-         System.out.println("MOVE TEMP " + (env_index) + " TIMES 4 TEMP " + (env_index-1));
+         System.out.println("MOVE TEMP " + (env_index) + " TIMES TEMP " + (env_index-1)+" 4");
          env_index++;
          System.out.println("MOVE TEMP "+ (env_index) + " PLUS TEMP " + (id_index) + " TEMP "+(env_index-1));
          int address_result = env_index;
@@ -1373,15 +1378,21 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       }
       else
       {
+         // {
+         //    System.out.println("starting in message send");
+         // }
          Vector<String>loc = (Vector<String>)argu;
          n.f0.accept(this, argu);
+         // {
+         //    System.out.println("primary expression done in message send");
+         // }
          n.f1.accept(this, argu);
          String class_name = loc.get(0);
          String method_name = (String)n.f2.accept(this, argu);
          //if(debug)
-         {
-            System.out.println("calss name is "+class_name+" method naem is "+method_name+" in message send");
-         }
+         // {
+         //    System.out.println("calss name is "+class_name+" method naem is "+method_name+" in message send");
+         // }
          
          Integer env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
          String object_type = temp_type.get(loc.get(0)).get(loc.get(1)).get((env_index-1));
@@ -1704,13 +1715,17 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
 
          System.out.println("HSTORE TEMP "+struct_address+" 0 TEMP "+method_table_address);
          System.out.println("MOVE TEMP "+env_index+" TEMP "+struct_address);
+         // if(debug)
+         // {
+         //    System.out.println("class : "+loc.get(0)+" method : "+loc.get(1));
+         // }
          temp_type.get(loc.get(0)).get(loc.get(1)).put(env_index,class_name);
          env_index++;
          temp_start_value.get(loc.get(0)).put(loc.get(1),env_index);
-         if(debug)
-         {
-            System.out.println("done in allocation expression");
-         }
+         // if(debug)
+         // {
+         //    System.out.println("done in allocation expression");
+         // }
          _ret = (R)class_name;
       }
       return _ret;
