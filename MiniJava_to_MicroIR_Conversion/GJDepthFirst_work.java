@@ -710,23 +710,16 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       {
          Vector<String>loc = (Vector<String>)argu;
          String id = (String)n.f0.accept(this, argu);
-         int id_index = -1;
+         boolean from_class = false;
          if(class_var.get(loc.get(0)).containsKey(id))
          {
-            int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
-            int offset = class_var.get(loc.get(0)).get(id);
-            System.out.println("MOVE TEMP " + (env_index) + " TEMP 0");
-            env_index++;
-            System.out.println("HLOAD TEMP " + (env_index) + " "+ " TEMP " + (env_index-1)+" "+offset);
-            id_index = env_index;
-            env_index++;
-            temp_start_value.get(loc.get(0)).put(loc.get(1),env_index);
+            from_class = true;
          }
          else
          {
             if(temp_method_var.get(loc.get(0)).get(loc.get(1)).containsKey(id))
             {
-               id_index = temp_method_var.get(loc.get(0)).get(loc.get(1)).get(id);
+               from_class = false;
             }
             else
             {
@@ -737,7 +730,16 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          n.f1.accept(this, argu);
          n.f2.accept(this, argu);
          int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
-         System.out.println("MOVE TEMP " + (id_index) + " TEMP " + (env_index-1));
+         if(from_class)
+         {
+            int offset = class_var.get(loc.get(0)).get(id);
+            System.out.println("HSTORE TEMP 0 "+offset+" TEMP "+(env_index-1));
+         }
+         else
+         {
+            int id_index = temp_method_var.get(loc.get(0)).get(loc.get(1)).get(id);
+            System.out.println("MOVE TEMP " + (id_index) + " TEMP " + (env_index-1));
+         }
          n.f3.accept(this, argu);
          if(debug)
          {
@@ -801,6 +803,23 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          n.f2.accept(this, argu);
          int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
          int array_index = env_index-1;
+
+         System.out.println("MOVE TEMP " + (env_index) + " 1");
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " 0");
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " MINUS TEMP "+ (env_index-1)+" TEMP "+(env_index-2));
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " LE TEMP " + (env_index-1)+" TEMP "+array_index);
+         env_index++;
+         System.out.println("HLOAD TEMP " + (env_index) + " TEMP " + (id_index)+" 0");
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " LE TEMP "+ (array_index)+" TEMP "+(env_index-1));
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " TIMES TEMP "+ (env_index-1)+" TEMP "+(env_index-3));
+         env_index++;
+
+         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + labels); labels++;
          System.out.println("MOVE TEMP " + (env_index) + " PLUS TEMP " + (array_index) + " 1");
          env_index++;
          System.out.println("MOVE TEMP " + (env_index) + " TIMES TEMP " + (env_index-1)+" 4");
@@ -809,6 +828,15 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          int address_result = env_index;
          env_index++;
          temp_start_value.get(loc.get(0)).put(loc.get(1),env_index);
+
+         System.out.println("JUMP L" + (labels));
+         System.out.println("L" + (labels-1));
+         System.out.println("NOOP");
+         System.out.println("ERROR");
+         
+         System.out.println("L" + (labels)); labels++;
+         System.out.println("NOOP");
+   
          n.f3.accept(this, argu);
          n.f4.accept(this, argu);
          n.f5.accept(this, argu);
@@ -851,13 +879,13 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          Vector<String>loc = (Vector<String>)argu;
          n.f0.accept(this, argu);
          n.f1.accept(this, argu);
+         int if_label = labels; labels++;
          n.f2.accept(this, argu);
          int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
-         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + labels);
-         labels++;
+         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + if_label);
          n.f3.accept(this, argu);
          n.f4.accept(this, argu);
-         System.out.println("L" + (labels-1));
+         System.out.println("L" + if_label);
          System.out.println("NOOP");
       }
       return _ret;
@@ -889,24 +917,25 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          Vector<String>loc = (Vector<String>)argu;
          n.f0.accept(this, argu);
          n.f1.accept(this, argu);
+
+         int else_label = labels; labels++;
+         int final_label = labels; labels++;
+
          n.f2.accept(this, argu);
          int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
-         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + labels);
-         labels++;
+         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + else_label);
 
          n.f3.accept(this, argu);
          n.f4.accept(this, argu);
 
-         System.out.println("JUMP L" + labels);
-
-         labels++;
-         System.out.println("L" + (labels-2));
+         System.out.println("JUMP L" + final_label);
+         System.out.println("L" + else_label);
          System.out.println("NOOP");
 
          n.f5.accept(this, argu);
          n.f6.accept(this, argu);
 
-         System.out.println("L" + (labels-1));
+         System.out.println("L" + final_label);
          System.out.println("NOOP");
       }
       return _ret;
@@ -935,21 +964,22 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          n.f0.accept(this, argu);
          n.f1.accept(this, argu);
 
-         System.out.println("L" + labels); labels++;
+         System.out.println("L" + labels); //l34
+         int start_label = labels; labels++;
+         int jump_label = labels; labels++;
+          
          System.out.println("NOOP");
 
          n.f2.accept(this, argu);
 
          int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
-         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + labels);
-
+         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + jump_label);
          n.f3.accept(this, argu);
          n.f4.accept(this, argu);
 
-         System.out.println("JUMP L" + (labels-1));
-         System.out.println("L" + (labels));  
+         System.out.println("JUMP L" + start_label);
+         System.out.println("L" + jump_label);  
          System.out.println("NOOP");
-         labels++;
       }
       return _ret;
    }
@@ -980,7 +1010,10 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          Vector<String>loc = (Vector<String>)argu;
          n.f0.accept(this, argu);
 
-         System.out.println("L" + labels); labels++;
+         int start_label = labels; labels++;
+         int jump_label = labels; labels++;
+
+         System.out.println("L" + start_label);
          System.out.println("NOOP");
 
          n.f1.accept(this, argu);
@@ -989,14 +1022,14 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          n.f4.accept(this, argu);
 
          int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
-         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + labels);
+         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + jump_label);
 
          n.f5.accept(this, argu);
          n.f6.accept(this, argu);
 
-         System.out.println("JUMP L" + (labels-1));
-         System.out.println("L" + (labels));
-         System.out.println("NOOP"); labels++;
+         System.out.println("JUMP L" + start_label);
+         System.out.println("L" + jump_label);
+         System.out.println("NOOP");
       }
       
       return _ret;
@@ -1314,6 +1347,22 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
          int array_index = env_index-1;
 
+         System.out.println("MOVE TEMP " + (env_index) + " 1");
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " 0");
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " MINUS TEMP "+ (env_index-1)+" TEMP "+(env_index-2));
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " LE TEMP " + (env_index-1)+" TEMP "+array_index);
+         env_index++;
+         System.out.println("HLOAD TEMP " + (env_index) + " TEMP " + (array_start_address)+" 0");
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " LE TEMP "+ (array_index)+" TEMP "+(env_index-1));
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " TIMES TEMP "+ (env_index-1)+" TEMP "+(env_index-3));
+         env_index++;
+         
+         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + labels); labels++;
          System.out.println("MOVE TEMP " + (env_index) + " PLUS TEMP " + array_index+" 1");
          env_index++;
          System.out.println("MOVE TEMP "+ (env_index) + " TIMES TEMP " + (env_index-1)+ " 4");
@@ -1323,6 +1372,15 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          System.out.println("HLOAD TEMP " + (env_index) + " TEMP " + (env_index-1)+" 0");
          env_index++;
          temp_start_value.get(loc.get(0)).put(loc.get(1),env_index);
+
+         System.out.println("JUMP L" + labels); 
+         System.out.println("L" + (labels-1)); 
+         System.out.println("NOOP");
+         System.out.println("ERROR");
+
+         System.out.println("L" + (labels));  labels++;
+         System.out.println("NOOP");
+
       }
       
       return _ret;
@@ -1497,13 +1555,27 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
       }
       else
       {
+         R id_name = (R)n.f0.accept(this, argu);
          Vector<String>loc = (Vector<String>)argu;
          if(n.f0.which == 3)
          {
-            String id = (String)n.f0.accept(this, argu);
-            if(temp_method_var.get(loc.get(0)).get(loc.get(1)).containsKey(id))
+            String id = (String)id_name;
+            if(class_var.get(loc.get(0)).containsKey(id))
+            {
+               int offset = class_var.get(loc.get(0)).get(id);
+               int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
+               System.out.println("HLOAD TEMP "+env_index+" TEMP 0 "+offset);
+               String type = class_var_type.get(loc.get(0)).get(id);
+               temp_type.get(loc.get(0)).get(loc.get(1)).put(env_index,type);
+               env_index++;
+               temp_start_value.get(loc.get(0)).put(loc.get(1),env_index);
+            }
+            else if(temp_method_var.get(loc.get(0)).get(loc.get(1)).containsKey(id))
             {
                int temp_index = temp_method_var.get(loc.get(0)).get(loc.get(1)).get(id);
+               // {
+               //    System.out.println("in primary expression temp index is "+temp_index);
+               // }
                int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
                System.out.println("MOVE TEMP "+env_index+" TEMP "+temp_index);
                String temp_index_type = temp_type.get(loc.get(0)).get(loc.get(1)).get(temp_index);
@@ -1512,7 +1584,6 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
                temp_start_value.get(loc.get(0)).put(loc.get(1),env_index);
             }
          }
-         _ret = (R)n.f0.accept(this, argu);
       }
 
       return _ret;
@@ -1640,12 +1711,44 @@ public class GJDepthFirst<R,A> implements GJVisitor<R,A> {
          n.f3.accept(this, argu);
          n.f4.accept(this, argu);
          int env_index = temp_start_value.get(loc.get(0)).get(loc.get(1));
-         int array_size_index = env_index-1;
-         System.out.println("MOVE TEMP "+env_index+" PLUS TEMP "+array_size_index+" 1");
-         array_size_index = env_index; env_index++;
-         System.out.println("MOVE TEMP "+env_index+" TIMES TEMP "+array_size_index+" 4");
+         int temp_array_size = env_index-1;
+
+         System.out.println("MOVE TEMP "+env_index+" PLUS TEMP "+temp_array_size+" 1");
          env_index++;
-         System.out.println("MOVE TEMP "+env_index+" HALLOCATE TEMP "+(env_index-1));
+         System.out.println("MOVE TEMP "+env_index+" TIMES TEMP "+(env_index-1)+" 4");
+         int temp_wanted_array_size = env_index;
+         env_index++;
+         System.out.println("MOVE TEMP "+env_index+" HALLOCATE TEMP "+temp_wanted_array_size);
+         env_index++;
+         System.out.println("MOVE TEMP "+env_index+" TEMP "+(env_index-1));
+         int array_start_address = env_index;
+         env_index++;
+         
+         //array length storing here
+         System.out.println("HSTORE TEMP "+(array_start_address)+" 0 TEMP "+temp_array_size);
+         System.out.println("MOVE TEMP " + (env_index) + " 4");
+         int temp_current_array_size = env_index;
+         env_index++;
+         System.out.println("L" + labels); labels++; //l38 label=39
+         System.out.println("MOVE TEMP "+(env_index)+" 4");
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index) + " PLUS TEMP " + (env_index-1)+" TEMP "+temp_current_array_size);
+         env_index++;
+         System.out.println("MOVE TEMP "+ (env_index) + " LE TEMP " + (env_index-1)+ " TEMP " + (temp_wanted_array_size));
+         env_index++;
+         System.out.println("CJUMP TEMP " + (env_index-1) + " L" + labels); labels++; //l39 labels=40
+         System.out.println("MOVE TEMP "+(env_index)+ " PLUS TEMP "+array_start_address+ " TEMP "+(temp_current_array_size));
+         env_index++;
+         System.out.println("MOVE TEMP " + (env_index)+" 0");
+         env_index++;
+         System.out.println("HSTORE TEMP " + (env_index-2) + " 0 TEMP " + (env_index-1));
+         System.out.println("MOVE TEMP "+ (env_index) + " TEMP "+temp_current_array_size);
+         env_index++;
+         System.out.println("MOVE TEMP "+ (temp_current_array_size) + " PLUS TEMP " + (env_index-1)+" 4");
+         System.out.println("JUMP L" + (labels-2));
+         System.out.println("L" + (labels-1));
+         System.out.println("NOOP");
+         System.out.println("MOVE TEMP "+ (env_index) + " TEMP "+array_start_address);
          env_index++;
          temp_start_value.get(loc.get(0)).put(loc.get(1),env_index);
       }
